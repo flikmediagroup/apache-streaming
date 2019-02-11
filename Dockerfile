@@ -1,4 +1,4 @@
-FROM vsync/baseimages-apache
+FROM cloudposse/apache-streaming
 
 LABEL maintainer "Markku Virtanen"
 
@@ -8,7 +8,7 @@ ADD http://h264.code-shop.com/download/apache_mod_h264_streaming-${APACHE_MOD_H2
 ADD http://people.apache.org/~pquerna/modules/mod_flvx.c /usr/src/mod_flvx.c
 
 RUN apt-get update && \
-    apt-get -y install apache2-threaded-dev build-essential && \
+    apt-get -y install apache2-dev build-essential && \
     tar -zvxf /usr/src/apache_mod_h264_streaming.tar.gz -C /usr/src/ &&  \
     cd /usr/src/mod_h264_streaming-${APACHE_MOD_H264_VERSION}/ && \
     ./configure --with-apxs=`which apxs` && \
@@ -25,5 +25,7 @@ RUN apt-get update && \
 ADD mods-available/ /etc/apache2/mods-available/
 
 RUN a2enmod h264_streaming && \
-    a2enmod flvx
+    a2enmod flvx && \
+    a2dismod cgi && \
+    a2disconf db-env
 
