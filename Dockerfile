@@ -22,10 +22,15 @@ RUN apt-get update && \
     apt-get clean all && \
     rm -rf /tmp/*
 
+# Link access log to stdout
+RUN ln -sf /dev/stdout /var/log/apache2/access.log
+
 ADD mods-available/ /etc/apache2/mods-available/
 
 RUN a2enmod h264_streaming && \
     a2enmod flvx && \
     a2dismod cgi && \
-    a2disconf db-env
-
+    a2disconf db-env && \
+    echo "RemoteIPHeader X-Forwarded-For" >> /etc/apache2/apache2.conf && \
+    echo "RemoteIPTrustedProxy 10.0.0.0/8" >> /etc/apache2/apache2.conf && \
+    sed -i.bak 's/LogFormat "%h %l %u %t \\"%r\\" %>s %O \\"%{Referer}i\\" \\"%{User-Agent}i\\"" combined/LogFormat "%a %l %u %t \\"%r\\" %>s %O \\"%{Referer}i\\" \\"%{User-Agent}i\\"" combined/' /etc/apache2/apache2.conf
